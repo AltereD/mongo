@@ -441,6 +441,10 @@ public:
         unsupportedExpression(expr->getOpName());
     }
 
+    void visit(const ExpressionBinaryPopCount* expr) override final {
+        unsupportedExpression(expr->getOpName());
+    }
+
     void visit(const ExpressionBinarySize* expr) override final {
         unsupportedExpression(expr->getOpName());
     }

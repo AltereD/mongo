@@ -3127,6 +3127,29 @@ public:
 };
 
 
+class ExpressionBinaryPopCount final : public ExpressionFixedArity<ExpressionBinaryPopCount, 1> {
+public:
+    ExpressionBinaryPopCount(ExpressionContext* const expCtx)
+        : ExpressionFixedArity<ExpressionBinaryPopCount, 1>(expCtx) {
+        expCtx->sbeCompatible = false;
+    }
+
+    Value evaluate(const Document& root, Variables* variables) const final;
+    const char* getOpName() const final;
+
+    void acceptVisitor(ExpressionMutableVisitor* visitor) final {
+        return visitor->visit(this);
+    }
+
+    void acceptVisitor(ExpressionConstVisitor* visitor) const final {
+        return visitor->visit(this);
+    }
+
+private:
+    std::size_t popCount(const unsigned char* binData, const std::size_t len) const;
+};
+
+
 class ExpressionBinarySize final : public ExpressionFixedArity<ExpressionBinarySize, 1> {
 public:
     ExpressionBinarySize(ExpressionContext* const expCtx)

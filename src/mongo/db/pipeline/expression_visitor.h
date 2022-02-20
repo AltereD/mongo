@@ -116,6 +116,7 @@ class ExpressionStrcasecmp;
 class ExpressionSubstrBytes;
 class ExpressionSubstrCP;
 class ExpressionStrLenBytes;
+class ExpressionBinaryPopCount;
 class ExpressionBinarySize;
 class ExpressionStrLenCP;
 class ExpressionSubtract;
@@ -274,6 +275,7 @@ public:
     virtual void visit(expression_walker::MaybeConstPtr<IsConst, ExpressionSubstrBytes>) = 0;
     virtual void visit(expression_walker::MaybeConstPtr<IsConst, ExpressionSubstrCP>) = 0;
     virtual void visit(expression_walker::MaybeConstPtr<IsConst, ExpressionStrLenBytes>) = 0;
+    virtual void visit(expression_walker::MaybeConstPtr<IsConst, ExpressionBinaryPopCount>) = 0;
     virtual void visit(expression_walker::MaybeConstPtr<IsConst, ExpressionBinarySize>) = 0;
     virtual void visit(expression_walker::MaybeConstPtr<IsConst, ExpressionStrLenCP>) = 0;
     virtual void visit(expression_walker::MaybeConstPtr<IsConst, ExpressionSubtract>) = 0;
@@ -450,6 +452,7 @@ struct SelectiveConstExpressionVisitorBase : public ExpressionConstVisitor {
     void visit(const ExpressionSubstrBytes*) override {}
     void visit(const ExpressionSubstrCP*) override {}
     void visit(const ExpressionStrLenBytes*) override {}
+    void visit(const ExpressionBinaryPopCount*) override {}
     void visit(const ExpressionBinarySize*) override {}
     void visit(const ExpressionStrLenCP*) override {}
     void visit(const ExpressionSubtract*) override {}

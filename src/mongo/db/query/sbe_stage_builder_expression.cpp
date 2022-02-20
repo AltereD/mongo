@@ -403,6 +403,7 @@ public:
     void visit(const ExpressionSubstrBytes* expr) final {}
     void visit(const ExpressionSubstrCP* expr) final {}
     void visit(const ExpressionStrLenBytes* expr) final {}
+    void visit(const ExpressionBinaryPopCount* expr) final {}
     void visit(const ExpressionBinarySize* expr) final {}
     void visit(const ExpressionStrLenCP* expr) final {}
     void visit(const ExpressionSubtract* expr) final {}
@@ -634,6 +635,7 @@ public:
     void visit(const ExpressionSubstrBytes* expr) final {}
     void visit(const ExpressionSubstrCP* expr) final {}
     void visit(const ExpressionStrLenBytes* expr) final {}
+    void visit(const ExpressionBinaryPopCount* expr) final {}
     void visit(const ExpressionBinarySize* expr) final {}
     void visit(const ExpressionStrLenCP* expr) final {}
     void visit(const ExpressionSubtract* expr) final {}
@@ -2795,6 +2797,9 @@ public:
         unsupportedExpression(expr->getOpName());
     }
     void visit(const ExpressionStrLenBytes* expr) final {
+        unsupportedExpression(expr->getOpName());
+    }
+    void visit(const ExpressionBinaryPopCount* expr) final {
         unsupportedExpression(expr->getOpName());
     }
     void visit(const ExpressionBinarySize* expr) final {

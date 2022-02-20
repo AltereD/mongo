@@ -5309,6 +5309,72 @@ const char* ExpressionStrLenBytes::getOpName() const {
     return "$strLenBytes";
 }
 
+/* -------------------------- ExpressionBinaryPopCount ------------------------------ */
+
+namespace {
+    template<int Size>
+    constexpr std::array<int, Size>
+    populatePopCntLut()
+    {
+        std::array<int, Size> result {};
+        
+        for (int i = 0; i < Size; ++i)
+        {
+            // Uses Kernighan method to populate the lookup table
+            int popCnt = 0;
+            for (int j = i; j != 0; j &= j - 1) {
+                popCnt++;
+            }
+
+            result[i] = popCnt;
+        }
+
+        return result;
+    }
+
+    constexpr std::array<int, 1 << CHAR_BIT> popCntLut = populatePopCntLut<1 << CHAR_BIT>();
+} // namespace
+
+Value ExpressionBinaryPopCount::evaluate(const Document& root, Variables* variables) const {
+    Value arg = _children[0]->evaluate(root, variables);
+    if (arg.nullish()) {
+        return Value(BSONNULL);
+    }
+
+    uassert(56789,
+            str::stream() << "$binaryPopCount requires a BinData argument, found: "
+                          << typeName(arg.getType()),
+            arg.getType() == BSONType::BinData);
+
+    BSONBinData binData = arg.getBinData();
+
+    // Returning null as a convention in order to avoid equality with a binary field containing only 0s
+    if (binData.length == 0)
+    {
+        return Value(BSONNULL);
+    }
+
+    return Value::createIntOrLong(popCount(static_cast<const unsigned char*>(binData.data), binData.length));
+}
+
+std::size_t ExpressionBinaryPopCount::popCount(const unsigned char* binData, const std::size_t len) const
+{
+    std::size_t cnt = 0;
+
+    // Lookup table based implementation with relatively good performance.
+    for (std::size_t i = 0; i < len; ++i) {
+        cnt += popCntLut[*(binData + i)];
+    }
+
+    return cnt;
+}
+
+REGISTER_STABLE_EXPRESSION(binaryPopCount, ExpressionBinaryPopCount::parse);
+
+const char* ExpressionBinaryPopCount::getOpName() const {
+    return "$binaryPopCount";
+}
+
 /* -------------------------- ExpressionBinarySize ------------------------------ */
 
 Value ExpressionBinarySize::evaluate(const Document& root, Variables* variables) const {

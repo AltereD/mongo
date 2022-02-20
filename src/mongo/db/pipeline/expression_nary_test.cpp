@@ -1183,6 +1183,44 @@ TEST_F(ExpressionRoundTwoArgTest, NullArg2) {
     assertEval(BSONNULL, 1, BSONNULL);
 }
 
+/* ------------------------- ExpressionBinaryPopCount -------------------------- */
+
+class ExpressionBinaryPopCountTest : public ExpressionNaryTestOneArg {
+public:
+    void assertEval(ImplicitValue input, ImplicitValue output) {
+        _expr = new ExpressionBinaryPopCount(&expCtx);
+        ExpressionNaryTestOneArg::assertEvaluates(input, output);
+    }
+
+    void assertEvalFails(ImplicitValue input) {
+        _expr = new ExpressionBinaryPopCount(&expCtx);
+        ASSERT_THROWS_CODE(eval(input), DBException, 56789);
+    }
+};
+
+TEST_F(ExpressionBinaryPopCountTest, RejectsNonBinData) {
+    assertEvalFails("abc"_sd);
+    assertEvalFails(123);
+    assertEvalFails(123.4);
+}
+
+TEST_F(ExpressionBinaryPopCountTest, HandlesBinData) {
+    const long long int64Max = 9223372036854775807LL;
+    const long long allBitsSet = -1LL;
+    assertEval(BSONBinData(static_cast<const void*>(&int64Max), sizeof(int64Max), BinDataGeneral), 63); // Same at the end
+    assertEval(BSONBinData(static_cast<const void*>(&allBitsSet), sizeof(allBitsSet), BinDataGeneral), 64); // Same at the end
+    assertEval(BSONBinData("abc", 3, BinDataGeneral), 10); // 3+3+4
+    assertEval(BSONBinData("ab\0c", 4, BinDataGeneral), 10); // The 0 in between shouldn't change the result
+    assertEval(BSONBinData("abc\0", 4, BinDataGeneral), 10); // Same at the end
+}
+
+TEST_F(ExpressionBinaryPopCountTest, HandlesNullish) {
+    assertEval(BSONNULL, BSONNULL);
+    assertEval(BSONUndefined, BSONNULL);
+    assertEval(BSONBinData("", 0, BinDataGeneral), BSONNULL);
+    assertEval(Value(), BSONNULL);
+}
+
 /* ------------------------- ExpressionBinarySize -------------------------- */
 
 class ExpressionBinarySizeTest : public ExpressionNaryTestOneArg {
